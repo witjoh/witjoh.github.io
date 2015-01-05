@@ -5,3 +5,5 @@ johan.koewacht.net
 
 My docs I want to share, mostly to myself .....
 
+The description of my home setup, managed by Puppet Enterprise 3.7.1 (or greater)
+
