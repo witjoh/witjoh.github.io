@@ -5,6 +5,8 @@ description: > # this means to ignore newlines until "baseurl:"
   This blog is the story of my home-brew micro IT infrastructure.  This is my playground, where I will do a lot of
   experimenting, hoping I don't loose any data (like my photos).  but therefor we have a backup, don't we ??
   At the moment I'm migrating my old almost dead hardware to something not that old, managed by a Puppet Enterprise server.
+
+  This site is checked by Travis : [![Build Status](https://travis-ci.org/witjoh/witjoh.github.io.svg?branch=master)](https://travis-ci.org/witjoh/witjoh.github.io)
 #baseurl:  # the subpath of your site, e.g. /blog/
 #url: "http://johan.koewacht.net" # the base hostname & protocol for your site
 #twitter_username:
