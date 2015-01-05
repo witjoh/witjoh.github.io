@@ -247,7 +247,7 @@ And next thing is to run r10k on the puppet master, which should create a new 't
   {% endhighlight %}
 
 Oh my god, I hope this does not comply to my setup :
-  {% highlight plain %}
+  {% highlight bash %}
     Hi,
 
     I really hope I am mistaken, but it seems you can't use r10k with it's full potential anymore in Puppet Enterprise 3.7.
@@ -269,7 +269,7 @@ Oh my god, I hope this does not comply to my setup :
 
 Lets see if we run in the same issue, as following [Did PE 3.7 kills r10k?][post] mailing list describes
 
-  {% highlight plain %}
+  {% highlight bash %}
     [root@dl380 ~]# puppet agent -t --noop --environment=thias
     Warning: Local environment: "thias" doesn't match server specified node environment "production", switching agent to "production".
     Info: Retrieving pluginfacts
@@ -288,7 +288,7 @@ environment we want, and stick with the 'production' environment. Reading the do
 
 And the solutions can be find in the reply of Justin :
 
-  {% highlight plain %}
+  {% highlight bash %}
     The new classifier does allow agents to specify their own environments, but it involves an extra couple of steps. What you'll want to do is create a new group for the nodes that you're concerned with (which could be all of them) and set the environment of the new group to "agent-specified" in the pull-down menu. If you never want to override that setting with another classifier group, then you should also set "Override all other environments" in the group's metadata.
   {% endhighlight %}
 
