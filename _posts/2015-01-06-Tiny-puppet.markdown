@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Exploring The Tiny Puppet Module of Alessandro Franceschi"
+title:  "Exploring The Tiny Puppet Module of Alessandro Franceschi - Part 1 "
 date:   2015-01-06 13:23:00
 categories: puppet
 tags:
@@ -8,7 +8,7 @@ tags:
   - puppet
   - forge
 ---
-Exploring The Tiny Puppet Module of Alessandro Franceschi Part 1
+Exploring The Tiny Puppet Module of Alessandro Franceschi - Part 1
 ================================================================
 
 Installing the module with r10k
