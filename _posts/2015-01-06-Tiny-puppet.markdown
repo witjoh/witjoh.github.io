@@ -8,8 +8,8 @@ tags:
   - puppet
   - forge
 ---
-Exploring The Tiny Puppet Module of Alessandro Franceschi
-=========================================================
+Exploring The Tiny Puppet Module of Alessandro Franceschi Part 1
+================================================================
 
 Installing the module with r10k
 -------------------------------

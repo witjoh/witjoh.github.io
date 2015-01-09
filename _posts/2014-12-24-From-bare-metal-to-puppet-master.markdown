@@ -21,7 +21,7 @@ I revived an old, out of support and unused DL380, which will be uses as my priv
 But first things first, and we will have to solve the chicken/egg problem before we can start configuring everything with Puppet: Get a puppet master up and running.
 
 The Hypervisor (dl380)
-======================
+----------------------
 
 For the initial installation, we will only configure one network interface, and we will do the  installation and configuration by hand. While we do the migration of my 'old' environment to this newborn one, we will need to do many adjustments, but then we will already have a working puppet infrastructure.
 
@@ -32,19 +32,19 @@ After putting in the CentOS7 netinstall cdrom into the drive I installed :
 * Adjusted my dns server
 * Post installation to obtain a working hypervisor.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# yum install qemu-kvm qemu-img
     [root@dl380 ~]# yum install virt-manager libvirt libvirt-python virt-install libvirt-client
   {% endhighlight %}
 
 Preparing the second disk for the VM images
-===========================================
+-------------------------------------------
 
 I choose to use the LVM based approach, and wanted to refresh my  libvirt storage-pool commands.
 Not all of my second disk is allocated to the Volume Group that will contain the guest images, so I
 needed two partitions (the partition type code for LVM is 8e)
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# fdisk -l /dev/sdb
 
     Disk /dev/sdb: 587.1 GB, 587128266752 bytes, 1146734896 sectors
@@ -61,7 +61,7 @@ needed two partitions (the partition type code for LVM is 8e)
 
 And create the initial volume group for the VM guest images
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# vgcreate guest_images_lvm /dev/sdb1
       No device found for PV 6hvxiF-55oK-DTM2-Ub4F-XXiB-IXxD-UnQIMI.
       Physical volume "/dev/sdb1" successfully created
@@ -75,11 +75,11 @@ And create the initial volume group for the VM guest images
   {% endhighlight %}
 
 Setting op a virsh storage pool
-===============================
+-------------------------------
 
 Since we have already defined the VG, we can use following command :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# virsh pool-create-as --name guest_images_pool \
                                          --type logical \
                                          --source-dev=/dev/sdb1 \
@@ -97,7 +97,7 @@ Since we have already defined the VG, we can use following command :
 We cannot turn the autostart on, because this pool is not persistent, because we did mot add the XML definition of it,
 so we had to execute the next commands to solve the problem and activate the storage pool at boot-time :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# virsh pool-dumpxml guest_images_pool > /root/guest_images_pool.xml
     [root@dl380 ~]# virsh pool-define /root/guest_images_pool.xml
     Pool guest_images_pool defined from /root/guest_images_pool.xml
@@ -130,7 +130,7 @@ And now we simply creates logical volumes using  libvirt. Again, this time we ne
 our first virtual machine, our initial puppet master. But we will look to manage this task (and all other needed steps
 to create new virtual machines) by puppet.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# virsh vol-create-as guest_images_pool  pepuppet_guest_volume 30G
     Vol pepuppet_guest_volume created
     [root@dl380 ~]# virsh vol-list guest_images_pool
@@ -158,7 +158,7 @@ The steps to create a bridge on a CentOS7 are :
 
 * First check if the bridge module is loaded :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# modprobe --first-time bridge
     modprobe: ERROR: could not insert 'bridge': Module already in kernel
     [root@dl380 ~]#
@@ -166,7 +166,7 @@ The steps to create a bridge on a CentOS7 are :
 
 * Edit some files
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# cd /etc/sysconfig/network-scripts/
 
     vi ifcfg-br0
@@ -197,7 +197,7 @@ The steps to create a bridge on a CentOS7 are :
 
 * And a reboot to test the config properly. Yes we still can log in, so we do not need to attach a keyboard/monitor to the server for fixing. :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# brctl show
     br0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
             inet 192.168.10.70  netmask 255.255.255.0  broadcast 192.168.10.255
@@ -225,7 +225,7 @@ The steps to create a bridge on a CentOS7 are :
 The preparation is almost done, but since we don't like to click through the installation screens,
 we just going to create a basic 'Kickstart' files to automate this boring process :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     #version=RHEL7
     # System authorization information
     auth --enableshadow --passalgo=sha512
@@ -263,7 +263,7 @@ we just going to create a basic 'Kickstart' files to automate this boring proces
 * And now we are ready to install our first VM on our old brand new hypervisor, and  watch some magic how a login prompt is born.
 
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# virt-install \
       --name=pepuppet \
       --controller type=scsi,model=virtio-scsi \
@@ -287,7 +287,7 @@ Lets get PE371 installed :
 We downloaded the software from puppetlabs, and transferred it to the root directory of the newly created VM.
 Here is the summary of the installation procedure, again I prefer the CLI based one, using the answer file method.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# tar -xzf puppet-enterprise-3.7.1-el-7-x86_64.tar.gz
     [root@pepuppet ~]# ln -sf puppet-enterprise-3.7.1-el-7-x86_64 puppet-enterprise
     [root@pepuppet puppet-enterprise]# touch dummy.txt
@@ -413,14 +413,14 @@ So we still manage those rules manually. And it is in the meantime a good introd
 In this initial setup, the eth0 interface is assigned to the public zone.
 One can look up the zone of an interface with :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet puppet-enterprise]# firewall-cmd --get-zone-of-interface=eth0
     public
   {% endhighlight %}
 
 And the current setting of this zone can be viewed using :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet puppet-enterprise]# firewall-cmd --zone=public --list-all
     public (default, active)
       interfaces: eth0
@@ -453,7 +453,7 @@ we create a xml file with following content :/etc/firewalld/services/puppet-ente
 
 and adjust SElinux settings :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet services]# ls -lZ puppet-enterprise.xml
     -rw-r--r--. root root unconfined_u:object_r:firewalld_etc_rw_t:s0 puppet-enterprise.xml
     [root@pepuppet services]# ls -lZ /usr/lib/firewalld/services/dns.xml
@@ -465,7 +465,7 @@ and adjust SElinux settings :
 
 Now we are ready to open the ports on the firewall :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet services]# firewall-cmd --zone=public --add-service=puppet-enterprise --permanent
     success
     [root@pepuppet services]# firewall-cmd --reload
@@ -475,7 +475,7 @@ Now we are ready to open the ports on the firewall :
 
 Ans we verify this with the command :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet]#iptables -L -n
     <....>
     Chain IN_public_allow (1 references)
@@ -493,5 +493,5 @@ and try to connect to the puppet console  to verify the working, by surfing to t
     https://pepuppet.koewacht.net
 
 The next step is to install and configure r10k and prepare everything to implement the profiles/role pattern.
-But that for another post.
+But that's for another post.
 

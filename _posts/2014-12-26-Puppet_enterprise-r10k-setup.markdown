@@ -24,7 +24,7 @@ That is something we really want, right ? , Version control, and from the beginn
 
 We also will stick with the default settings of the modules and manifest directories, which on puppet enterprise are :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
      [root@pepuppet environments]# puppet master --configprint modulepath
      /etc/puppetlabs/puppet/environments/production/modules:/etc/puppetlabs/puppet/modules:/opt/puppet/share/puppet/modules
      [root@pepuppet environments]# puppet master --configprint manifest
@@ -40,7 +40,7 @@ In Puppet Enterprise, the production environment is already setup, with a minima
 Also, PE is already configured correctly for the 'Directory Environments' setup.
 
 Adjusting my github to work better with r10k
-============================================
+--------------------------------------------
 
 The only thing I wish to do here is to rename gits default branch 'master' to 'production'.  This way, we are matching git's branches to puppet
 environments.
@@ -59,9 +59,9 @@ This is one way to rename my 'master' branch to 'production' :
 Now we only have a production branch.
 
 Installing r10k
-===============
+---------------
 
-(just following Gary's blog)
+(just following [Gary's blog][garys-r10k])
 
 * puppet module install zack/r10k
 * modify Gary's configure_10rk.pp manifest (point to my github repository, and adjusted the r10k version to 1.4.0)
@@ -91,9 +91,9 @@ Installing r10k
   {% endhighlight %}
 
 * Transfer the file to my pepuppet master
-* puppet apply configure_r10k.pp
 
-  {% highlight bash %}
+  {% highlight shell-session %}
+    [root@pepupept ~]# /opt/puppet/bin/puppet apply configure_r10k.pp
     Notice: Compiled catalog for pepuppet.koewacht.net in environment production in 0.65 seconds
     Notice: /Stage[main]/Git/Package[git]/ensure: created
     Notice: /Stage[main]/R10k::Install/Package[r10k]/ensure: created
@@ -103,11 +103,11 @@ Installing r10k
   {% endhighlight %}
 
 Create initial files in the Control repo
-========================================
+----------------------------------------
 In our case, this will be an empty Puppetfile, and starting with all the other needed files from Gary's examples.
 Whenever the needs arise, those files will be adjusted when the need arises.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [witjoh@fc20 pepuppet]$ git status
     On branch production
 
@@ -129,7 +129,7 @@ Whenever the needs arise, those files will be adjusted when the need arises.
 
 Time to see if r10k works.  Looking at the modules installed in our production environment, we have the following list :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet manifests]# puppet module list
     /etc/puppetlabs/puppet/environments/production/modules
     ├── gentoo-portage (v2.2.0)
@@ -155,13 +155,13 @@ Time to see if r10k works.  Looking at the modules installed in our production e
     ├── puppetlabs-pe_repo (v0.7.7-51-g5ba0427)
     ├── puppetlabs-pe_staging (v0.3.3-2-g3ed56f8)
     └── puppetlabs-puppet_enterprise (v3.7.1-90-g4a9e885)
-    [root@pepuppet manifests]# 
+    [root@pepuppet manifests]#
   {% endhighlight %}
 
 We did install the zack-r10k modules, which pulled in a lot of other modules due to its dependencies.
 In our Puppetfile, we have not defined any module yet, so let's see what r10k is doing with my puppet server :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# r10k deploy environment -pv
     [R10K::Action::Deploy::Environment - INFO] Deploying environment /etc/puppetlabs/puppet/environments/production
     [R10K::Action::Deploy::Environment - ERROR] Command exited with non-zero exit code:
@@ -169,19 +169,19 @@ In our Puppetfile, we have not defined any module yet, so let's see what r10k is
     Stderr:
     fatal: destination path '/etc/puppetlabs/puppet/environments/production' already exists and is not an empty directory.
     Exit code: 128
-    [root@pepuppet ~]# 
+    [root@pepuppet ~]#
   {% endhighlight %}
 
 Oops !!!! This is a git error, it won't clone a repository to an existing directory, so we have to interfere manually, by moving our current production environment tree out of the way :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# mv /etc/puppetlabs/puppet/environments/production /etc/puppetlabs/puppet/environments/production_old
     [root@pepuppet ~]# r10k deploy environment -pv
   {% endhighlight %}
 
 which will give me the following result :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# tree /etc/puppetlabs/puppet/environments/
     /etc/puppetlabs/puppet/environments/
     `-- production
@@ -206,25 +206,15 @@ production tree I moved aside.
 
 I already have one module on github, so I added it to the Puppetfile, pushed it to github and reran r10k :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# r10k deploy environment -pv
     [R10K::Action::Deploy::Environment - INFO] Deploying environment /etc/puppetlabs/puppet/environments/production
     [R10K::Action::Deploy::Environment - INFO] Deploying module /etc/puppetlabs/puppet/environments/production/modules/motd
     [root@pepuppet ~]#
   {% endhighlight %}
 
-Yeah- it works.
+Yeah - it works.
 
 Moving to the next step, but that will be another post.
-
-
-
-
-
-
-
-
-
-
 
 [garys-r10k]: http://garylarizza.com/blog/2014/08/31/r10k-plus-directory-environments/

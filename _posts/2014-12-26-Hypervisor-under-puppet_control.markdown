@@ -8,21 +8,21 @@ tags:
   - puppet
   - forge
 ---
-Getting the hypervisor under puppets control
-===========================================
+Getting the hypervisor under puppets control - Part 1
+=====================================================
 
 Installing the PE 3.7.1 agent on the dl380 (hypervisor)
-=======================================================
+-------------------------------------------------------
 
 Since the OS of my puppet master and the dl380 are the same, installing the puppet agent is quit simple :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     curl -k https://pepuppet:8140/packages/current/install.bash | sudo bash.
   {% endhighlight %}
 
 If you are running this command as root, one can leave the sudo from the command. Above command will install the pe-agent package and all its dependencies, and start the pe-puppet process :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
       % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                      Dload  Upload   Total   Spent    Left  Speed
     100  9805  100  9805    0     0  28264      0 --:--:-- --:--:-- --:--:-- 28338
@@ -51,7 +51,7 @@ If you are running this command as root, one can leave the sudo from the command
 
 Now, when we trigger a puppet run, we encounter the following message :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# /opt/puppet/bin/puppet agent -t --noop
     Exiting; no certificate found and waitforcert is disabled
     [root@dl380 ~]#
@@ -60,7 +60,7 @@ Now, when we trigger a puppet run, we encounter the following message :
 meaning we need to sign the dl380's the certificate on the puppetmaster.
 Let's first have a look at the certificates that needs to be signed :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# puppet cert list
        "dl380.koewacht.net" (SHA256) FA:6C:58:69:A2:E9:D7:EF:74:69:31:BF:2C:77:90:25:00:D0:6F:A4:AE:A1:A8:62:F1:7A:80:6D:EA:71:40:BE
     [root@pepuppet ~]#
@@ -68,7 +68,7 @@ Let's first have a look at the certificates that needs to be signed :
 
 Signing can be done with (on the puppetmaster)
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# puppet cert sign dl380.koewacht.net
     Notice: Signed certificate request for dl380.koewacht.net
     Notice: Removing file Puppet::SSL::CertificateRequest dl380.koewacht.net at '/etc/puppetlabs/puppet/ssl/ca/requests/dl380.koewacht.net.pem'
@@ -77,7 +77,7 @@ Signing can be done with (on the puppetmaster)
 
 Last step to do is to trigger a run on dl380, to install the Puppet Enterprise Agent configuration stuff.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     root@dl380 ~]# /opt/puppet/bin/puppet agent -t
     Info: Caching certificate for dl380.koewacht.net
     Info: Caching certificate_revocation_list for ca
@@ -93,7 +93,7 @@ Last step to do is to trigger a run on dl380, to install the Puppet Enterprise A
 
 and now our dl380 is a real puppet node. When we go to the [console][console], we see two nodes, our puppetmaster and the dl380.  Another simple way to check if everything is correctly configured is using mcollective.  Just follow the next steps on the puppetmaster :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# su - peadmin
     peadmin@pepuppet:~$ mco ping
     pepuppet.koewacht.net                    time=113.79 ms
@@ -105,7 +105,7 @@ and now our dl380 is a real puppet node. When we go to the [console][console], w
   {% endhighlight %}
 
 The Puppet Forge
-================
+----------------
 But now what ? I get the feeling I will need many more Virtual Machines, and I'm not the guy to repeat this boring process over and over again.  If we look at how we did install the puppet master,we need the following :
 
 * A storage-pool
@@ -117,7 +117,7 @@ I see some candidates of new puppet type, the storage pools and volumes, some te
 
 This is already a good list of requirements to start with.  So lets have a look if something useful already exists.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     peadmin@pepuppet:~$ puppet module search libvirt
     Notice: Searching https://forgeapi.puppetlabs.com ...
     NAME                  DESCRIPTION                                                         AUTHOR        KEYWORDS
@@ -168,12 +168,12 @@ And peeking into the modules, I believe I will go with :
 * thias-libvirt
 
 testing a puppet forge module
-=============================
+-----------------------------
 
 In the control repo, (the one that contains the Puppetfile, manifests etc ...), we will create a new branch,
 add the thias/libvirt modules to the Puppetfile in this branch.  Also time to create our profiles and roles modules, so we are able to introduce this concept in our setup and add both new modules also to the Puppetfile.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [witjoh@fc20 pepuppet]$ git branch thias
     [witjoh@fc20 pepuppet]$ git branch
     * production
@@ -183,7 +183,7 @@ add the thias/libvirt modules to the Puppetfile in this branch.  Also time to cr
     [witjoh@fc20 pepuppet]$ git branch
       production
     * thias
-    [witjoh@fc20 pepuppet]$ vi Puppetfile 
+    [witjoh@fc20 pepuppet]$ vi Puppetfile
     [witjoh@fc20 pepuppet]$ git status
     On branch thias
     Changes not staged for commit:
@@ -210,7 +210,7 @@ add the thias/libvirt modules to the Puppetfile in this branch.  Also time to cr
 
 I created an empty repository on github, and cloned them on my laptop.  In those empty repos, we will create an empty puppet module.
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [witjoh@fc20 koewacht-newpuppet]$ git clone https://github.com/witjoh/pepuppet-profiles.git
     Cloning into 'pepuppet-profiles'...
     warning: You appear to have cloned an empty repository.
@@ -229,13 +229,13 @@ adjusted the README.md files.
 
 After that, is pushed those changes to github :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
 [witjoh@fc20 pepuppet-profiles]$ git push origin master
   {% endhighlight %}
 
 And next thing is to run r10k on the puppet master, which should create a new 'thias' environment :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@pepuppet ~]# r10k deploy environment -pv
     [R10K::Action::Deploy::Environment - INFO] Deploying environment /etc/puppetlabs/puppet/environments/production
     [R10K::Action::Deploy::Environment - INFO] Deploying module /etc/puppetlabs/puppet/environments/production/modules/motd
@@ -247,7 +247,7 @@ And next thing is to run r10k on the puppet master, which should create a new 't
   {% endhighlight %}
 
 Oh my god, I hope this does not comply to my setup :
-  {% highlight bash %}
+  {% highlight shell-session %}
     Hi,
 
     I really hope I am mistaken, but it seems you can't use r10k with it's full potential anymore in Puppet Enterprise 3.7.
@@ -269,7 +269,7 @@ Oh my god, I hope this does not comply to my setup :
 
 Lets see if we run in the same issue, as following [Did PE 3.7 kills r10k?][post] mailing list describes
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# puppet agent -t --noop --environment=thias
     Warning: Local environment: "thias" doesn't match server specified node environment "production", switching agent to "production".
     Info: Retrieving pluginfacts
@@ -288,7 +288,7 @@ environment we want, and stick with the 'production' environment. Reading the do
 
 And the solutions can be find in the reply of Justin :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     The new classifier does allow agents to specify their own environments, but it involves an extra couple of steps. What you'll want to do is create a new group for the nodes that you're concerned with (which could be all of them) and set the environment of the new group to "agent-specified" in the pull-down menu. If you never want to override that setting with another classifier group, then you should also set "Override all other environments" in the group's metadata.
   {% endhighlight %}
 
@@ -298,7 +298,7 @@ Time to start reading some docs  :
 * [The new Node Manager App][classification]
 
 The PE console - making r10K environments work
-=============================================
+----------------------------------------------
 
 The only thing we want to achieve right now is to make it possible to switch environments without adjusting some
 configuration, be it in the console, puppet.conf or site.pp or some other place where it could be possible. Thing is we only have one single
@@ -338,7 +338,7 @@ Curious which node is selected :
 
 and the final test :
 
-  {% highlight bash %}
+  {% highlight shell-session %}
     [root@dl380 ~]# puppet agent -t --noop --environment=thias
     Info: Retrieving pluginfacts
     Info: Retrieving plugin
