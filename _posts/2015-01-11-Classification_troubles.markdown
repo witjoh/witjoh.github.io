@@ -50,7 +50,7 @@ More info will follow as soon as this is worked out properly
 [Add_class_groups_01.png]: {{ site.url }}/images/Add_class_groups_01.png "Overeview all node groups"
 [Add_class_groups_02.png]: {{ site.url }}/images/Add_class_groups_03.png "Details hypervisor group"
 [Add_class_groups_03.png]: {{ site.url }}/images/Add_class_groups_03.png "Details thias testing group"
-[Add_class00.png]: {{ site.url }}/images/Add_class01.png "Adding a class to the node group"
+[Add_class00.png]: {{ site.url }}/images/Add_class00.png "Adding a class to the node group"
 [Add_class01.png]: {{ site.url }}/images/Add_class01.png "Class is added, waiting commit"
 [Add_class02.png]: {{ site.url }}/images/Add_class02.png "Error message commit"
 [Add_class03.png]: {{ site.url }}/images/Add_class03.png "When trying to leave the screen"
