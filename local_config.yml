@@ -1,0 +1,25 @@
+# Site settings
+title: Johan's Documentation Stuff
+email: johan@koewacht.net
+description: > # this means to ignore newlines until "baseurl:"
+  This blog is the story of my home-brew micro IT infrastructure.  This is my playground, where I will do a lot of
+  experimenting, hoping I don't loose any data (like my photos).  but therefor we have a backup, don't we ??
+  At the moment I'm migrating my old almost dead hardware to something not that old, managed by a Puppet Enterprise server.
+#baseurl:  # the subpath of your site, e.g. /blog/
+#url: "http://johan.koewacht.net" # the base hostname & protocol for your site
+#twitter_username:
+github_username:  witjoh
+
+# Build settings
+markdown: kramdown
+#highlighter: rouge
+highlighter: pygments
+
+# to solve the following error on github.io :
+#  ERROR: YOUR SITE COULD NOT BE BUILT:
+#
+#  ------------------------------------
+#
+#  Invalid date '0000-00-00': Post '/vendor/bundle/ruby/1.9.1/gems/jekyll-2.4.0/lib/site_template/_posts/0000-00-00-welcome-to-jekyll.markdown.erb' i
+#  does not have a valid date in the filename.
+exclude: [vendor]
